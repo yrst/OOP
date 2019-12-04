@@ -8,12 +8,14 @@
 using namespace std;
 
 class Inventory;
+class Fight;
 
 class Player {
 	private:
 		string name;
 		int health, strenght, dexterity, lvl;
 		bool life;//нужна как условие выхода из боя и  для возможных айтемов, которые избегают смерти, тип хп 0, но лайф остается тру и можно продолжить играть накинув 50 хп и сломав предмет, если он есть (например)
+		friend class Fight;
 
 	public:
 		friend class Inventory;
@@ -54,10 +56,14 @@ class Player {
 };
 
 class Mob{
+	private:
+		friend class Fight;
+		friend class Player;
 	protected:
 		string name;
-		int health, strenght, dexterity, lvl;
+		int health, strenght, dexterity, lvl,maxhealth;
 		virtual void mob_init(string n){};
+		virtual void Fight_log(){};
 
 	public:
 
@@ -79,6 +85,7 @@ class Mob{
 
 class Bandit : public Mob{
 	public:
+		friend class Fight;
 		Bandit(string n) : Mob(n){
 			mob_init(n);
 			cout << "'бандит' завершено" << endl;
@@ -87,16 +94,21 @@ class Bandit : public Mob{
 	protected:
 		void mob_init(string n){	//создание бандита
 				name = n;
-				health = 20;
+				health = maxhealth = 20;
 				strenght = 4;
 				dexterity = 4;
 				lvl = 10;
 		}
 
+		void Fight_log(){
+ 		 cout << "Перед тобой стоит вылитый уголовник с саблей наперевес." << endl << "Настроен он явно агрессивно"<<endl<<"Совет что-то предпринять!"<< endl;
+ 	 }
+
 };
 
 class Rat:public Mob{
 	public:
+		friend class Fight;
 		Rat(string n) : Mob(n){
 			mob_init(n);
 			cout << "'крыса' завершено" << endl;
@@ -105,11 +117,15 @@ class Rat:public Mob{
 	protected:
 	  void mob_init(string n){	//создание рики
 	 		 name = n;
-	 		 health = 6;
+	 		 health = maxhealth = 6;
 	 		 strenght = 2;
 	 		 dexterity = 2;
 	 		 lvl = 1;
 	  }
+
+		void Fight_log(){
+ 		 cout << "Вы слышите нервирующий писк издаваемый грязным клочком меха." << endl << "Писк ОООоочень противный."<<endl<<"Может прибить, чтобы не мучилась?"<< endl;
+ 	 }
 };
 
 class Item {
@@ -136,6 +152,43 @@ class Dialoges{
 
 };
 
+class Fight{
+	public:
+		template < class  mobclass >
+		Fight(Player &character, mobclass &enemy_mob){
+	 		system("clear");
+			cout<< "Пошла заруба"<< endl;
+			enemy_mob.Fight_log();
+			 Fight_against(character,enemy_mob);
+
+		}
+		~Fight(){
+			cout<< "Бой окончен."<<endl;
+		}
+
+	private:
+
+		template < class  mobclass >
+		void Fight_against(Player &character, mobclass &enemy_mob){
+			int i,comand_cin;
+				while((character.life==true) && (enemy_mob.health>0)){ //пока жив игрок или моб
+					cout << "Вы атакуете "<< enemy_mob.name <<endl;
+					cin >> comand_cin;
+					if(comand_cin==1){
+						attack(character, enemy_mob);
+					}
+
+				}
+		}
+
+		template < class  mobclass >
+		void attack(Player &character, mobclass &enemy_mob){
+			enemy_mob.health=enemy_mob.health - character.strenght;
+			cout << "Oof" << endl << enemy_mob.name << "  получил " << character.strenght << " урона." << endl;
+			cout << "У " << enemy_mob.name << " осталось всего " << enemy_mob.health << " хп" << endl;
+		}
+
+};
 
 int WelcomeScreen(){
 	cout << " Wake up, Neo"<<endl;
@@ -163,9 +216,16 @@ int main() {
 	Inventory inven;
 	p.listp();
 	p.lvlmodifier(5); //пример работы лвл модифаера
-
-	Bandit gary("Gary");
-	gary.listp();
+	if(1){
+		Bandit gary("Gary");
+		gary.listp();
+		Fight init(p,gary);
+	}
+	if(1){
+		Rat raticat("Rattat");
+		raticat.listp();
+		Fight init_rat(p,raticat);
+	}
 
 	return 0;
 }
