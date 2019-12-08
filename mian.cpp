@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <stdlib.h>
+
+#include <unistd.h>
 //#include <locale>
 
 using namespace std;
@@ -13,24 +15,26 @@ class Fight;
 class Player {
 	private:
 		string name;
-		int health_max, current_health, strenght, dexterity;
-		int current_lvl, current_xp, need_xp;
-		bool life;//нужна как условие выхода из боя и  для возможных айтемов, которые избегают смерти, тип хп 0, но лайф остается тру и можно продолжить играть накинув 50 хп и сломав предмет, если он есть (например)
+		int health_max, health_current, strenght, dexterity;
+		int lvl_current, xp_current, xp_need;
 		friend class Fight;
 		friend class Inventory;
 
 	public:
+
+		bool life;//нужна как условие выхода из боя и  для возможных айтемов, которые избегают смерти, тип хп 0, но лайф остается тру и можно продолжить играть накинув 50 хп и сломав предмет, если он есть (например)
+
 		Player(string n){ //создание лоха 1го лвла
 			name = n;
 			life = true;
-			health_max =current_health = rand() % 4 + 8; //start hp [8-12]
+			health_max =health_current = rand() % 4 + 8; //start hp [8-12]
 			strenght = rand() % 7 + 10; // [start str [10-16]
 			dexterity = rand() % 5 + 10; // start dex [10-14]
-			current_lvl = 1;
-			current_xp = 0;
-			need_xp = 300;
+			lvl_current = 1;
+			xp_current = 0;
+			xp_need = 300;
 
-			system("clear");
+			system("cls");
 			cout << name << " создан" << endl;
 		}
 
@@ -38,10 +42,10 @@ class Player {
 		void lvlmodifier (int lev) {
 			cout << "После (пока что псевдо) апдейта от лвл" << endl;
 			health_max = health_max + lev*8;
-			current_health = current_health+ lev*8;
+			health_current = health_current+ lev*8;
 			strenght = strenght + lev;
 			dexterity = dexterity + lev;
-			cout << "Текущее здоровье " << current_health << " из "<< health_max << endl;
+			cout << "Текущее здоровье " << health_current << " из "<< health_max << endl;
 			cout << "Сила " << strenght << endl;
 			cout << "Ловкость " << dexterity << endl;
 		}
@@ -49,13 +53,18 @@ class Player {
 		//функция вывода текущего состояния хар-к персонажа
 		void listp (){
 			cout << name << endl;
-			cout << "Уровень " << current_lvl << endl;
-			cout << "Текущее здоровье " << current_health << " из "<< health_max << endl;
+			cout << "Уровень " << lvl_current << endl;
+			cout << "Текущее здоровье " << health_current << " из "<< health_max << endl;
 			cout << "Сила " << strenght << endl;
 			cout << "Ловкость " << dexterity << endl;
 
 		}
 
+		void Player_death_check(Player *&character){
+			if(character->health_current<=0){
+				character->life =false;
+			}
+		}
 
 };
 
@@ -65,7 +74,7 @@ class Mob{
 		friend class Player;
 	protected:
 		string name;
-		int current_health, health_max, strenght, dexterity, lvl;
+		int health_current, health_max, strenght, dexterity, lvl_current;
 		int xp_give;
 		virtual void mob_init(string n){};
 		virtual void Fight_log(){};
@@ -80,8 +89,8 @@ class Mob{
 		void listp (){
 			  cout << "----------------"<<endl;
 				cout << name << endl;
-				cout << "Уровень " << lvl << endl;
-				cout << "Текущее здоровье " << current_health << " из "<< health_max << endl;
+				cout << "Уровень " << lvl_current << endl;
+				cout << "Текущее здоровье " << health_current << " из "<< health_max << endl;
 				cout << "Сила " << strenght << endl;
 				cout << "Ловкость " << dexterity << endl;
 		  	cout << "----------------"<<endl;
@@ -93,10 +102,10 @@ class Bandit : public Mob{
 
 		void mob_init(string n){	//создание бандита
 				name = n;
-				current_health = health_max = 20;
+				health_current = health_max = 20;
 				strenght = 16;
-				dexterity = 10;
-				lvl = 5;
+				dexterity = 13;
+				lvl_current = 5;
 				xp_give = 250;
 		}
 
@@ -117,10 +126,10 @@ class Rat:public Mob{
 
 		  virtual void mob_init(string n){	//создание рики
 		 		 name = n;
-		 		 current_health = health_max = 6;
+		 		 health_current = health_max = 6;
 		 		 strenght = 2;
 		 		 dexterity = 2;
-		 		 lvl = 1;
+		 		 lvl_current = 1;
  				 xp_give = 40;
 		  }
 
@@ -163,11 +172,11 @@ class Dialoges{
 class Fight{
 	public:
 		template < class  mobclass >
-		Fight(Player &character, mobclass &enemy_mob){
+		Fight(Player *&character, mobclass *&enemy_mob){
 	 		//system("clear");
 			cout<< "Пошла заруба"<< endl;
-			enemy_mob.Fight_log(); // С кем встретился
-			 Fight_against(character,enemy_mob); //вызов сценария боя, можно потом переделать этот класс на "взаимодействие" и в нём вызывать сценарий боя
+			enemy_mob->Fight_log(); // С кем встретился
+			Fight_against(character,enemy_mob); //вызов сценария боя, можно потом переделать этот класс на "взаимодействие" и в нём вызывать сценарий боя
 
 		}
 		~Fight(){
@@ -177,92 +186,165 @@ class Fight{
 	private:
 
 		template < class  mobclass >
-		void Fight_against(Player &character, mobclass &enemy_mob){
+		void Fight_against(Player *&character, mobclass *&enemy_mob){
 			int i,comand_cin;
-				while((character.life==true) && (enemy_mob.current_health>0)){ //пока жив игрок или моб
-					cout << "Что будете делать с "<< enemy_mob.name <<endl;
+				while((character->life==true) && (enemy_mob->health_current>0)){ //пока жив игрок или моб
+					cout << "Что будете делать с "<< enemy_mob->name << endl << "1 - атаковать, 2 - Оценить противника, 4 - попытаться сбежать" <<endl;
 					cin >> comand_cin;
 					if(comand_cin==1){
 						attack(character, enemy_mob); // ВЖБАН
 					}
+					if(comand_cin==2){
+						Fight_stat_info(character, enemy_mob); // Запрашиваю информацию
+					}
 					if(comand_cin==4){
 						run_away(character, enemy_mob); // По съёбам
 					}
+					character->Player_death_check(character);
 				}
-				if((enemy_mob.current_health==0)&&(comand_cin!=4)){
-					character.current_xp += enemy_mob.xp_give;
-					if(character.current_xp>=character.need_xp){
-						character.need_xp*=3;
-						character.lvlmodifier(1);
-					}
-				}
-				else{
-					if(character.current_health==0){
-						cout << " You died ¯|_(ツ)_/¯"<<endl;
+				if((enemy_mob->health_current<=0)&&(comand_cin!=4)){
+					character->xp_current += enemy_mob->xp_give;
+					if(character->xp_current>=character->xp_need){
+						character->xp_need*=3;
+						character->lvlmodifier(1);
 					}
 				}
 		}
 
 		template < class  mobclass >
-		void attack(Player &character, mobclass &enemy_mob){
+		void attack(Player *&character, mobclass *&enemy_mob){
 			int attack_player_damage;
-			attack_player_damage=((character.strenght-10)/2) + rand()%4;
-			enemy_mob.current_health=enemy_mob.current_health - attack_player_damage;
-			cout << "Oof" << endl << enemy_mob.name << "  получил " << attack_player_damage << " урона." << endl;
-			cout << "У " << enemy_mob.name << " осталось всего " << enemy_mob.current_health << " хп" << endl;
+			int reverse_attack;
+			attack_player_damage=((character->strenght-10)/2) + rand()%4;
+			enemy_mob->health_current=enemy_mob->health_current - attack_player_damage;
+			cout << "----------------"<<endl;
+			cout << "Oof" << endl << enemy_mob->name << "  получил " << attack_player_damage << " урона." << endl;
+			cout << "У " << enemy_mob->name << " осталось всего " << enemy_mob->health_current << " хп" << endl;
+			cout << "----------------"<<endl;
+			sleep(1);
+			reverse_attack = rand()%100;
+			if (reverse_attack > 50){
+				cout << enemy_mob->name << " будет атаковать!" << endl;
+				int reverse_damage;
+				cout << "----------------"<<endl;
+				reverse_damage=(enemy_mob->strenght/2 + rand()%3);
+				character->health_current = character->health_current - reverse_damage;
+				cout << enemy_mob->name << " ударил в ответ и вы получили " << reverse_damage << " урона." << endl;
+				if(character->health_current<0){
+					cout << "У вас осталось 0 хп" << endl;
+				}
+				else
+					cout << "У вас осталось " << character->health_current << " хп" << endl;
+				cout << "----------------"<<endl;
+			}
 		}
 
 
 		template < class  mobclass >
-		void run_away(Player &character, mobclass &enemy_mob){
-			int ran_atemp = (rand()%20)+1 + (character.dexterity-10)/2;
+		void Fight_stat_info(Player *&character, mobclass *&enemy_mob){
+				cout << "----------------"<<endl;
+				cout << "\t\t" << character->name << "\t\t" << enemy_mob->name << endl;
+				cout << "Уровень          " << character->lvl_current << "\t\t" << enemy_mob->lvl_current <<endl;
+				cout << "Текущее здоровье " << character->health_current << "\t\t" << enemy_mob->health_current << endl;
+				cout << "Сила             " << character->strenght << "\t\t" << enemy_mob->strenght << endl;
+				cout << "Ловкость         " << character->dexterity << "\t\t" << enemy_mob->dexterity << endl;
+				cout << "----------------"<<endl;
+		}
+
+		template < class  mobclass >
+		void run_away(Player *&character, mobclass *&enemy_mob){
+			int ran_atemp = (rand()%20)+1 + (character->dexterity-10)/2;
 			cout << ran_atemp;
-			if(ran_atemp>=enemy_mob.dexterity){
-				enemy_mob.current_health = 0;
+			if(ran_atemp>=enemy_mob->dexterity){
+				enemy_mob->health_current = 0;
 				cout << "При попытке побега от вас и след простыл"<<endl;
 			}
 			else{
-				cout << "Вы попытались убежать, но споткнулись об камень и упали."<< endl << "Коленочке очень больно: -3хп" << endl;
-				character.current_health = character.current_health -3;
+				cout << "Вы попытались убежать"<<endl;
+				sleep(1);
+				cout << "Но споткнулись об камень и упали."<< endl;
+				sleep(1);
+				cout << "Коленочке очень больно: -3хп" << endl;
+				character->health_current = character->health_current -3;
 			}
 		}
 
 };
 
-int WelcomeScreen(){
-	cout << " Wake up, Neo"<<endl;
-	cout << " We have the city to burn!"<<endl<< endl<< " Проснуться?"<<endl<< " ";
+int FirstAwakening(){
+	cout << "Wake up, Neo"<<endl;
+	sleep(1);
+	cout << "We have the city to burn!"<<endl;
+	sleep(1);
+	 cout << endl<< "Проснуться? (yes/no)"<<endl;
+
 	string answer;
 	cin >> answer;
-	if(answer=="Да"){
+	if(answer=="yes"){
 		return 0;
 	}
 	return 66;
 }
 
 int main() {
-	setlocale( LC_ALL,"Russian" ); //русское имя все равно вводить не получается ы
+	setlocale( LC_ALL,"Russian" );
 	srand(time(NULL));
  	//system("clear");
+	bool fight = false;
 
-	if(WelcomeScreen()==66){
-		cout << " You died ¯|_(ツ)_/¯"<<endl;
+
+	if(FirstAwakening()==66){
+		cout << "Вы не можете заснуть, но продолжаете лежать с закрытыми глазами." << endl;
+		sleep(1);
+		cout << "Задумавшись о бренности бытия вы решили больше не просыпаться." << endl;
+		sleep(1);
+		cout <<". ";
+		sleep(1);
+		cout <<". ";
+		sleep(1);
+		cout <<"."<<endl;
+		sleep(1);
+		cout << "You died ¯|_(ツ)_/¯"<<endl;
 		return 0;
 	}
+	cout << "Как вас зовут?" << endl;
 	string name;
 	cin >> name;
-	Player p(name);
-	Inventory inven;
-	p.listp();
-	if(1){
-		Bandit gary("Gary");
-		gary.listp();
-		Fight init(p,gary); //вызвать боёвку с гари
+	sleep(1);
+	cout << "Очень приятно, " << name << endl;
+	sleep(1);
+	cout << "Вот твои характеристики" << endl;
+	sleep(0.5);
+	Player *p = new Player(name);
+	p->listp();
+
+	string answer;
+	cout << "Вы хотите вступить в пробный бой? (yes/no)" << endl;
+	cin >> answer;
+	system("cls");
+	if(answer=="yes"){
+		fight = true;
 	}
-	if(1){
-		Rat raticat("Rattat");
-		raticat.listp();
+	if(fight == true){
+		Bandit *gary = new	Bandit("Gary");
+		cout << "Ваш противник" << endl;
+		gary->listp();
+		sleep(5);
+		system("cls");
+		Fight init(p,gary); //вызвать боёвку с гари
+		if(p->life==false){
+			cout << " You died ¯|_(ツ)_/¯"<<endl;
+			return 0;
+		}
+	}
+	if(fight == true){
+		Rat *raticat = new Rat("Rattat");
+		raticat->listp();
 		Fight init_rat(p,raticat);
+		if(p->life==false){
+			cout << " You died ¯|_(ツ)_/¯"<<endl;
+			return 0;
+		}
 	}
 
 	return 0;
