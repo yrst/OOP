@@ -295,7 +295,7 @@ public:
 	    cout << endl << "#Вы хотите вступить в пробный бой? (yes/no)" << endl;
 	    cin >> answer;
 			getchar();
-	    if (answer != "yes") {
+	    if (answer != "yes") { //выхд из метода, если не хош бучение проходить
 				cout << endl << "- МММ "<<endl;
 				sleep(1);
 				cout << "Ясно";
@@ -420,7 +420,7 @@ public:
     }
   };
 
-void FurtherDialog(){
+void FurtherDialog(){ //Для смены диалогового окна, когда перс говорит ещё после очищения
 	cout << endl << endl << "\t\t\t\t 'Нажмите Enter, для продолжения'";
 	int input =getchar();
 	while(input!=10){
