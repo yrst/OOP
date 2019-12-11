@@ -55,12 +55,13 @@ Player(string n) { //создание лоха 1го лвла
 
   //функция вывода текущего состояния хар-к персонажа
     void listp() {
-    cout << name << endl;
-    cout << "Уровень " << lvl_current << endl;
-    cout << "Текущее здоровье " << health_current << " из " << health_max
-         << endl;
-    cout << "Сила " << strenght << endl;
-    cout << "Ловкость " << dexterity << endl;
+		  cout << "----------------" << endl;
+	    cout << "Имя персонажа: "<< name << endl;
+	    cout << "Уровень: " << lvl_current << endl;
+	    cout << "Текущее здоровье: " << health_current << " из " << health_max << endl;
+	    cout << "Сила: " << strenght << endl;
+	    cout << "Ловкость: " << dexterity << endl;
+		  cout << "----------------" << endl;
   }
 
   static void Player_death_check(Player *&character) {
@@ -89,12 +90,12 @@ public:
 
   void listp() {
     cout << "----------------" << endl;
-    cout << name << endl;
-    cout << "Уровень " << lvl_current << endl;
-    cout << "Текущее здоровье " << health_current << " из " << health_max
+    cout << "Имя: "<< name << endl;
+    cout << "Уровень: " << lvl_current << endl;
+    cout << "Текущее здоровье: " << health_current << " из " << health_max
          << endl;
-    cout << "Сила " << strenght << endl;
-    cout << "Ловкость " << dexterity << endl;
+    cout << "Сила: " << strenght << endl;
+    cout << "Ловкость: " << dexterity << endl;
     cout << "----------------" << endl;
   }
 };
@@ -256,20 +257,56 @@ public:
     }
 
     string Take_players_name() {
-      cout << endl << endl << "*И в правду, как меня зовут?*" << endl;
+      cout << endl << endl << " *И в правду, как меня зовут?*" << endl;
       string name;
-      cin >> name;
+			getchar();
+			getline(cin,name);
       sleep(1);
       system("clear");
 			cout << "Голос продолжает: "<<endl;
 			sleep(1);
-      cout << "-Кароче " << name
-           << ", я тебя спас и в благородство играть не буду: \n";
+      cout << "- Кароче " << name << ", я тебя спас и в благородство играть не буду: \n";
       cout << "выполнишь для меня пару заданий — и мы в расчете. Заодно \n"
               "посмотрим, как быстро ты после обучения игру пройдёшь. ";
 			FurtherDialog();
       return name;
     }
+
+		void Stat_Explanation(Player *&character){
+	    system("clear");
+	    cout << endl<< "- Теперь глянь-ка сюда." << endl;
+			sleep(1);
+			cout << "Вот твои характеристики:"<< endl << endl;
+	    character->listp();
+			sleep(1);
+			cout << endl << "С ними ты не растанешься до конца свовего пути."<<endl;
+			sleep(1);
+			cout << "Обязательно следи за показателем здоровья, ты же"<<endl
+					 << "не хочешь неожидано стать очередным жмуром, хе-хе." <<endl;
+	 	  FurtherDialog();
+
+		}
+
+		void Fight_Train(Player *&character){
+			system("clear");
+			cout << "- Теперь перейдём к более интересной части твоего \nпребывания здесь - тренировке боя."<<endl;
+			string answer;
+			sleep(1);
+	    cout << endl << "#Вы хотите вступить в пробный бой? (yes/no)" << endl;
+	    cin >> answer;
+			getchar();
+	    if (answer != "yes") {
+				cout << endl << "- МММ "<<endl;
+				sleep(1);
+				cout << "Ясно";
+	 			FurtherDialog();
+				return;
+			}
+
+
+			Dummy *dummy = new Dummy("Стэн");
+
+		}
   };
 
   class Fight {
@@ -385,15 +422,18 @@ public:
 
 void FurtherDialog(){
 	cout << endl << endl << "\t\t\t\t 'Нажмите Enter, для продолжения'";
-	getchar();
-	getchar();
+	int input =getchar();
+	while(input!=10){
+		 input =getchar();
+	}
+	return;
 }
 
   int main() {
     setlocale(LC_ALL, "Russian");
     srand(time(NULL));
     // system("clear");
-    bool fight = false;
+		bool fight = false;
 
     Narrative *narrative = new Narrative();
     Entry_level *entry = new Entry_level();
@@ -411,37 +451,30 @@ void FurtherDialog(){
     narrative->Awaken_Start();
     string name = entry->Take_players_name();
     Player *p = new Player(name);
-    cout << "Вот твои характеристики" << endl;
-    p->listp();
+		entry->Stat_Explanation(p);
+		entry->Fight_Train(p);
+		if (fight == true) {
+			Bandit *gary = new Bandit("Gary");
+			cout << "Ваш противник" << endl;
+			gary->listp();
+			sleep(5);
+			system("clear");
+			Fight init(p, gary); //вызвать боёвку с гари
+			if (p->life == false) {
+				cout << " You died ¯|_(ツ)_/¯" << endl;
+				return 0;
+			}
+		}
+		if (fight == true) {
+			Rat *raticat = new Rat("Rattat");
+			raticat->listp();
+			Fight init_rat(p, raticat);
+			if (p->life == false) {
+				cout << " You died ¯|_(ツ)_/¯" << endl;
+				return 0;
+			}
+		}
 
-    string answer;
-    cout << "Вы хотите вступить в пробный бой? (yes/no)" << endl;
-    cin >> answer;
-    system("clear");
-    if (answer == "yes") {
-      fight = true;
-    }
-    if (fight == true) {
-      Bandit *gary = new Bandit("Gary");
-      cout << "Ваш противник" << endl;
-      gary->listp();
-      sleep(5);
-      system("clear");
-      Fight init(p, gary); //вызвать боёвку с гари
-      if (p->life == false) {
-        cout << " You died ¯|_(ツ)_/¯" << endl;
-        return 0;
-      }
-    }
-    if (fight == true) {
-      Rat *raticat = new Rat("Rattat");
-      raticat->listp();
-      Fight init_rat(p, raticat);
-      if (p->life == false) {
-        cout << " You died ¯|_(ツ)_/¯" << endl;
-        return 0;
-      }
-    }
 
     return 0;
   }
