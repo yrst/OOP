@@ -120,8 +120,9 @@ public:
 
   virtual void Fight_log() {
     cout << "Перед тобой стоит вылитый уголовник с саблей наперевес." << endl
-         << "Настроен он явно агрессивно" << endl
-         << "Советую что-то предпринять!" << endl;
+         << "Настроен он явно агрессивно" << endl;
+	  sleep(1);
+    cout << "Советую что-то предпринять!" << endl;
   }
 };
 
@@ -201,7 +202,7 @@ class Dialoges {};
 
 class Narrative {
 public:
-  void Awaken_Start() {
+  static void Awaken_Start() {
     sleep(1);
     cout << endl
          << "Открыв глаза, ты продолжаешь видеть темноту и лишь твоё \n"
@@ -299,152 +300,165 @@ public:
     cout << endl << "#Вы хотите вступить в пробный бой? (yes/no)" << endl;
     cin >> answer;
     getchar();
+		bool train = true;
     if (answer != "yes") { //выхд из метода, если не хош бучение проходить
       cout << endl << "- МММ " << endl;
       sleep(1);
       cout << "Ясно";
-      FurtherDialog();
-      return;
+      train =false;
     }
-    cout << "- Хах, а ты смелее, чем кажешься.\n- Чтож, давай посмотрим что ты "
-            "можешь "
-         << endl;
-    sleep(1);
-    FurtherDialog();
-    system("clear");
-    cout << endl
-         << "Перед вами вдруг появляется манекен.\n Он выглядит достаточно "
-            "грзно, чтобы напугать вас.\n Что вы хотите сделать с ним? \n 1 - "
-            "атаковать 2 - поговорить с ним 3 - убежать"
-         << endl;
+		if(train==true){
+	    //Dummy *dummy = new Dummy("Стэн");
+	    cout << "- Хах, а ты смелее, чем кажешься.\n- Чтож, давай посмотрим что ты "
+	            "можешь "
+	         << endl;
+	    sleep(1);
+	    FurtherDialog();
+	    system("clear");
+	    cout << endl
+	         << "Перед вами вдруг появляется манекен.\nОн выглядит достаточно "
+	            "грозно, чтобы напугать вас.\nЧто вы хотите сделать с ним? \n 1-"
+	            "атаковать\t 2-поговорить с ним\t 3-оценить\t 4-ничего не делать"
+	         << endl;
 
-    bool train = true;
-    int hpm = 4, good_end = 0, bad_end = 0, ans = 0;
-    while (train == true) {
-      cin >> ans;
-      system("clear");
-      if (ans == 1) {
-        cout << endl
-             << "Вы атакуете манекен. Вам кажется, что это нелепо.\n На "
-                "манекене появилась царапина.\n Он жалобно смотрит на вас в "
-                "ответ."
-             << endl;
-        hpm--;
-        sleep(1);
-        cout << "Что дальше? \n 1 - атаковать 2 - поговорить с ним 3 - убежеать"
-             << endl;
-      }
+	    int hpm = 0, good_end = 0, just_end = 0, estimate=0, ans = 0;
+	    while (train == true) {
+	      cin >> ans;
+	      system("clear");
 
-      if (ans == 2) {
-        cout << endl
-             << "Вы говорите манекену несколько хороших слов. \n Вам кажется, "
-                "что манекен стал добрее смотреть на вас"
-             << endl;
-        good_end++;
-        sleep(1);
-        cout << "Что дальше? \n 1 - атаковать 2 - поговорить с ним 3 - убежеать"
-             << endl;
-      }
+	      if (ans == 1) {
+					if(hpm<2){
+						if(hpm==1){
+	        		cout << endl << "Вы атакуете манекен. Вам кажется, что это нелепо."<<endl;
+							sleep(1);
+							cout << "На манекене появилась царапина."<<endl;
+							sleep(1);
+							cout << "Он жалобно смотрит на вас в ответ." << endl;
+						 }
+						 else{
 
-      if (ans == 3) {
-        cout << "Вы попытались убежать. Вы переоценили себя. \n Неизвестная "
-                "сила вернула вас назад."
-             << endl;
-        bad_end++;
-        sleep(1);
-        cout << "Что дальше? \n 1 - атаковать 2 - поговорить с ним 3 - убежеать"
-             << endl;
-      }
+						 }
+					}
+	        hpm++;
+	      }
+	      if (ans == 2) {
+					if(good_end<2){
+		        cout << endl << "Вы говорите манекену несколько хороших слов. Это странно,"
+						                "\nно кажется, манекен стал добрее смотреть на вас" << endl;
+					}
+	        good_end++;
+	      }
+				if (ans == 3){
+					if (estimate ==0){
+						cout << endl <<"Манекен как манекен, ничего небычного."<<endl;
+						estimate++;
+					}
+					else
+						if (estimate == 1){
+							cout << endl <<"Манекен как манекен, вроде-бы ничего небычного."<<endl;
+							estimate++;
+						}
+						else
+							if (estimate == 2){
+								cout << endl <<"Манекен как манекен, кажется ничего небычного."<<endl;
+								sleep(1);
+								cout << "Хотя погодите-ка" << endl;
+								sleep(1);
+								cout << "Вы замечаете на одежде у манекена герб далёкого королевства"<<endl;
+								estimate++;
+							}
+							else
+								if (estimate ==3){
+									cout << endl <<"Манекен королевских кровей."<<endl;
+								}
+				}
 
-      if (hpm == 0) {
-        system("clear");
-        sleep(1);
-        cout << "Манекен от полученных ударов разваливается. \n Вам кажется, "
-                "что из его глаз выбежала пара слез."
-             << endl;
-        sleep(1);
-        cout << "- Да, что и следовало ожидать от человека. \n- Ты жесток."
-             << endl;
-        sleep(1);
-        cout << "- Чтож, если ты решил идти по такому пути, то не вини меня, "
-                "дружок.\n- Тебе будет очень трудно."
-             << endl;
-        sleep(1);
-        cout << "..." << endl;
-        sleep(1);
-        cout << endl
-             << "Вы просыпаетесь в каком-то лесу. \n Вы были рады "
-                "порассматривать окружение, но \n на вас вдруг напал "
-                "человек.\n Выглядит он как типичный бандит. "
-             << endl;
-        train = false;
-      }
-      if (good_end == 3) {
-        system("clear");
-        sleep(1);
-        cout << "Вам показалось, что манекен улыбнулся вам. \n В следующую "
-                "секунду он растворился во тьме."
-             << endl;
-        sleep(2);
-        cout << endl
-             << "- Хах, человек. Ты заинтересовал меня. \n- Кажется, ты "
-                "понимаешь, что нельзя все решать одними кулаками."
-             << endl;
-        sleep(2);
-        cout << endl
-             << "- Но при этом, я вижу, что ты сможешь дать отпор, если "
-                "понадобится. \n- Очень инетерсно"
-             << endl;
-        sleep(2);
-        cout << endl
-             << "- Пожалуй, я награжу тебя. Дам тебе очки опыта.\n- С их "
-                "помощью ты можешь повышать свой уровень и характеристики.\n- "
-                "Они очень полезны"
-             << endl;
-        sleep(1);
-        character->xp_current += 300;
-        if (character->xp_current >= character->xp_need) {
-          character->xp_need *= 3;
-          character->lvlmodifier(1);
-        }
-        train = false;
-      }
-      if (bad_end == 3) {
-        system("clear");
-        sleep(1);
-        cout << "- Хах." << endl;
-        sleep(1);
-        cout << "- Ахахах." << endl;
-        sleep(2);
-        cout << "- Кажется, я ошибся в тебе, человек. \n- Ты ничтожен. "
-                "Абсолютно ни на что не годен."
-             << endl;
-        sleep(4);
-        cout << "- Я тебя спас от смерти, перенеся в этот мир.\n- Видимо зря. "
-                "Чтож."
-             << endl;
-        sleep(5);
-        system("clear");
-        cout << "- ПРОЩАЙ. НАВСЕГДА." << endl;
-        character->life = false;
-        Sudden_Death();
-        train = false;
-      }
-    }
-    Dummy *dummy = new Dummy("Стэн");
+	      if (ans == 4) {
+					if(just_end<2){
+		        cout << "Вы ничего не делаете. \nКак и ожидалось, манекен тоже ничего не делает." << endl;
+						Display_Elipsis();
+						cout <<endl << "-Пожалуй тебе стоит хоть что-то сделать."<<endl;
+					}
+	        just_end++;
+				}
+				sleep(1);
+				cout << endl << "Что дальше? \n 1-атаковать\t 2-поговорить с ним\t 3-оценить\t 4-ничего не делать" << endl;
+
+	      if (hpm ==3) {
+	        system("clear");
+	        sleep(1);
+	        cout << "Манекен от полученных ударов разваливается. \n Вам кажется, "
+	                "что из его глаз выбежала пара слез."
+	             << endl;
+	        sleep(1);
+	        cout << "-Да, что и следовало ожидать."
+	             << endl;
+	        sleep(1);
+	        cout << "-Чтож, если ты решил идти по такому пути, то не вини меня, дружок." << endl;
+	        sleep(1);
+	        train = false;
+					getchar();
+	      }
+
+	      if (good_end == 3) {
+	        system("clear");
+	        sleep(1);
+	        cout << "Вам показалось, что манекен улыбнулся вам. \n В следующую "
+	                "секунду он растворился во тьме."
+	             << endl;
+	        sleep(2);
+	        cout << endl
+	             << "-Хах, человек. Ты заинтересовал меня. \n-Кажется, ты "
+	                "понимаешь, что нельзя все решать одними кулаками."
+	             << endl;
+	        sleep(2);
+	        cout << endl
+	             << "-Но при этом, я вижу, что ты сможешь дать отпор, если "
+	                "понадобится. \n-Очень инетерсно"
+	             << endl;
+	        sleep(2);
+	        cout << endl
+	             << "-Пожалуй, я награжу тебя. Дам тебе очки опыта.\n-С их "
+	                "помощью ты можешь повышать свой уровень и характеристики.\n- "
+	                "Они очень полезны"
+	             << endl;
+	        sleep(1);
+	        character->xp_current += 300;
+	        if (character->xp_current >= character->xp_need) {
+	          character->xp_need *= 3;
+	          character->lvlmodifier(1);
+	        }
+	        train = false;
+					getchar();
+	      }
+	      if (just_end == 3) {
+	        system("clear");
+	        sleep(1);
+	        cout << "-Хах." << endl;
+	        sleep(1);
+	        cout << "-Ахахах." << endl;
+	        sleep(1);
+	        cout << "-Будем считать, что ты всё понял." << endl;
+	        train = false;
+					getchar();
+	      }
+	    }
+		}
+		FurtherDialog();
+		system("clear");
   }
 };
+
 
 class Fight {
 public:
   template <class mobclass> Fight(Player *&character, mobclass *&enemy_mob) {
     // system("clear");
     cout << "Пошла заруба" << endl;
+		sleep(1);
     enemy_mob->Fight_log(); // С кем встретился
-    Fight_against(
-        character,
-        enemy_mob); //вызов сценария боя, можно потом переделать этот класс
-                    //на "взаимодействие" и в нём вызывать сценарий боя
+    Fight_against(character, enemy_mob); //вызов сценария боя, можно потом переделать этот класс
+                    										 //на "взаимодействие" и в нём вызывать сценарий боя
   }
   ~Fight() { cout << "Бой окончен." << endl; }
 
@@ -455,13 +469,13 @@ private:
     while ((character->life == true) &&
            (enemy_mob->health_current > 0)) { //пока жив игрок или моб
       cout << "Что будете делать с " << enemy_mob->name << endl
-           << "1 - атаковать, 2 - Оценить противника, 4 - попытаться сбежать"
+           << "1-атаковать\t 3-оценить\t 4-попытаться сбежать"
            << endl;
       cin >> comand_cin;
       if (comand_cin == 1) {
         attack(character, enemy_mob); // ВЖБАН
       }
-      if (comand_cin == 2) {
+      if (comand_cin == 3) {
         Fight_stat_info(character, enemy_mob); // Запрашиваю информацию
       }
       if (comand_cin == 4) {
@@ -494,7 +508,7 @@ private:
     cout << "----------------" << endl;
     sleep(1);
     reverse_attack = rand() % 100;
-    if (reverse_attack > 50) {
+    if (reverse_attack > 50 && enemy_mob->health_current>0) {
       cout << enemy_mob->name << " будет атаковать!" << endl;
       int reverse_damage;
       cout << "----------------" << endl;
@@ -511,7 +525,7 @@ private:
   }
 
   template <class mobclass>
-  void Fight_stat_info(Player *&character, mobclass *&enemy_mob) {
+  static  void Fight_stat_info(Player *&character, mobclass *&enemy_mob) {
     cout << "----------------" << endl;
     cout << "\t\t" << character->name << "\t\t" << enemy_mob->name << endl;
     cout << "Уровень          " << character->lvl_current << "\t\t"
@@ -553,6 +567,31 @@ void FurtherDialog() { //Для смены диалогового окна, ко
   return;
 }
 
+
+class Level_Forest : public History_procedure{
+
+	public:
+
+		void Adventure_Start(Player *&character){
+			system("clear");
+			cout << endl
+					 << "Чёрная пелена вокруг вас начинает рассеиваться."<<endl;
+			sleep(1);
+			cout << "Через некоторое время ты определяешь свою местоположение в каком-то лесу." <<endl;
+			sleep(1);
+			cout << "Ты может и был бы рад порассматривать окружение, но из кустов появился человек." << endl;
+		  sleep(1);
+					 	 FurtherDialog();
+					   Bandit *gary = new Bandit("Gary");
+				     system("clear");
+				     Fight init_bandit(character, gary); //вызвать боёвку с гари
+				     if (character->life == false) {
+				       cout << " You died ¯|_(ツ)_/¯" << endl;
+				       return ;
+				     }
+		}
+};
+
 int main() {
   setlocale(LC_ALL, "Russian");
   srand(time(NULL));
@@ -577,27 +616,20 @@ int main() {
   Player *p = new Player(name);
   entry->Stat_Explanation(p);
   entry->Fight_Train(p);
-  if (fight == true) {
-    Bandit *gary = new Bandit("Gary");
-    cout << "Ваш противник" << endl;
-    gary->listp();
-    sleep(5);
-    system("clear");
-    Fight init(p, gary); //вызвать боёвку с гари
-    if (p->life == false) {
-      cout << " You died ¯|_(ツ)_/¯" << endl;
-      return 0;
-    }
-  }
-  if (fight == true) {
-    Rat *raticat = new Rat("Rattat");
-    raticat->listp();
-    Fight init_rat(p, raticat);
-    if (p->life == false) {
-      cout << " You died ¯|_(ツ)_/¯" << endl;
-      return 0;
-    }
-  }
+	free(entry);
+
+	Level_Forest *adventure = new Level_Forest;
+	adventure->Adventure_Start(p);
+
+	if (p->life == true) {
+		Rat *raticat = new Rat("Rattat");
+		raticat->listp();
+		Fight init_rat(p, raticat);
+		if (p->life == false) {
+			cout << " You died ¯|_(ツ)_/¯" << endl;
+			return 0;
+		}
+	}
 
   return 0;
 }
